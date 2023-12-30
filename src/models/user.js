@@ -1,12 +1,14 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 // mongoose.connect("mongodb://127.0.0.1:27017/udemy-task-manager-api", {
 //   useNewUrlParser: true,
 //   useCreateIndex: true,
 // });
 
-const User = mongoose.model("User", {
+const userSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -34,6 +36,7 @@ const User = mongoose.model("User", {
   },
   email: {
     type: String,
+    unique: true,
     required: true,
     validate(value) {
       if (!validator.isEmail(value)) {
@@ -43,16 +46,49 @@ const User = mongoose.model("User", {
     trim: true,
     lowercase: true,
   },
+  tokens: [
+    {
+      token: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
+userSchema.statics.findByCredentials = async (email, password) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error("Unable to login");
+  }
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error("Unable to login");
+  }
+  return user;
+};
+
+userSchema.methods.generateAuthToken = async function () {
+  const user = this;
+  const token = jwt.sign({ _id: user._id.toString() }, "thisissecretcode");
+
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
+
+  return token;
+};
+
+// Hash the plain text password before saving
+userSchema.pre("save", async function (next) {
+  const user = this;
+
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
+  }
+
+  next();
+});
+
+const User = mongoose.model("User", userSchema);
+
 module.exports = User;
-
-// const me = new User({ name: "Róbert Ráturdő", age: 49, email: "mike@con.com" });
-
-// me.save()
-//   .then(() => {
-//     console.log(me);
-//   })
-//   .catch((error) => {
-//     console.log("Error!", error);
-//   });
