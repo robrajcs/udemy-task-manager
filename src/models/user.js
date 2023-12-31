@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     minlength: 7,
     validate(value) {
       if (value.toLowerCase().includes("password")) {
-        throw new Error('Passrosd must not contain "password"');
+        throw new Error('Password must not contain "password"');
       }
     },
   },
@@ -76,6 +76,16 @@ userSchema.methods.generateAuthToken = async function () {
   await user.save();
 
   return token;
+};
+
+userSchema.methods.toJSON = function () {
+  const user = this;
+  const userObject = user.toObject();
+
+  delete userObject.password;
+  delete userObject.tokens;
+
+  return userObject;
 };
 
 // Hash the plain text password before saving
