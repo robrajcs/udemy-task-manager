@@ -1,11 +1,5 @@
 const mongoose = require("mongoose");
-const validator = require("validator");
-// const bcrypt = require("bcryptjs");
-
-// mongoose.connect("mongodb://127.0.0.1:27017/udemy-task-manager-api", {
-//   useNewUrlParser: true,
-//   useCreateIndex: true,
-// });
+// const validator = require("validator");
 
 const taskSchema = new mongoose.Schema({
   description: {
@@ -17,17 +11,13 @@ const taskSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "User",
+  },
+  {timestamps: true}
 });
-
-// taskSchemaSchema.pre("save", async function (next) {
-//   const task = this;
-
-//   if (task.isModified("password")) {
-//     task.password = await bcrypt.hash(task.password, 8);
-//   }
-
-//   next();
-// });
 
 const Task = mongoose.model("Task", taskSchema);
 
