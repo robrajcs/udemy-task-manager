@@ -9,54 +9,60 @@ const Task = require("./task");
 //   useCreateIndex: true,
 // });
 
-const userSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  age: {
-    type: Number,
-    default: 0,
-    validate(value) {
-      if (value < 0) {
-        throw new Error("Age must be a positive number");
-      }
+const userSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-  },
-  password: {
-    type: String,
-    required: true,
-    trim: true,
-    minlength: 7,
-    validate(value) {
-      if (value.toLowerCase().includes("password")) {
-        throw new Error('Password must not contain "password"');
-      }
-    },
-  },
-  email: {
-    type: String,
-    unique: true,
-    required: true,
-    validate(value) {
-      if (!validator.isEmail(value)) {
-        throw new Error("Email is invalid");
-      }
-    },
-    trim: true,
-    lowercase: true,
-  },
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
+    age: {
+      type: Number,
+      default: 0,
+      validate(value) {
+        if (value < 0) {
+          throw new Error("Age must be a positive number");
+        }
       },
     },
-  ],
-  {timestamps: true}
-});
+    password: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: 7,
+      validate(value) {
+        if (value.toLowerCase().includes("password")) {
+          throw new Error('Password must not contain "password"');
+        }
+      },
+    },
+    email: {
+      type: String,
+      unique: true,
+      required: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Email is invalid");
+        }
+      },
+      trim: true,
+      lowercase: true,
+    },
+    tokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
+    avatar: {
+      type: Buffer,
+    },
+    // timestamps: true,
+  },
+  { timestamps: true }
+);
 
 userSchema.statics.findByCredentials = async (email, password) => {
   const user = await User.findOne({ email });
@@ -86,6 +92,7 @@ userSchema.methods.toJSON = function () {
 
   delete userObject.password;
   delete userObject.tokens;
+  delete userObject.avatar;
 
   return userObject;
 };
