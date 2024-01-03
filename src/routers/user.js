@@ -107,8 +107,9 @@ router.delete("/users/me", auth, async (req, res) => {
     //   return res.status(404).send();
     // }
     await req.user.remove();
-    res.send(user);
+    res.send(req.user);
   } catch (e) {
+    console.log(e);
     res.status(500).send(e);
   }
 });
@@ -123,8 +124,6 @@ const upload = multer({
     }
 
     cb(undefined, true);
-    // cb(new Error('File must be a PDF'))
-    // cb(undefined, true)
   },
 });
 
