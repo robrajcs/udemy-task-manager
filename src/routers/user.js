@@ -140,6 +140,8 @@ router.post(
   auth,
   upload.single("avatar"),
   async (req, res) => {
+    // console.log("req.file.buffer");
+    // console.log("DDDDDDDDD");
     const buffer = await sharp(req.file.buffer)
       .resize({ width: 250, height: 250 })
       .png()
